@@ -52,7 +52,7 @@ char* test_nn_layer_init_convolutional()
     int pad[2] = {0, 0};
     int size[2] = {3, 3};
     int stride[2] = {1, 1};
-    int odim[2] = {0, 0};
+    int odim[3] = {2, 0, 0};
     l->kernelCount = 2;
     l->inputCount = 25;
     l->inputDimensionCount = 2;
@@ -64,9 +64,9 @@ char* test_nn_layer_init_convolutional()
     nn_layer_init_convolutional(l);
 
     mu_assert(l->outputCount == 9 * l->kernelCount, "outputCount initalize to 9");
-    mu_assert(l->outputDimensions[0] == 3, "outputCount initalize to 9");
+    mu_assert(l->outputDimensions[0] == l->kernelCount, "outputCount initalize to 9");
     mu_assert(l->outputDimensions[1] == 3, "outputCount initalize to 9");
-    mu_assert(l->outputDimensions[2] == l->kernelCount, "outputCount initalize to 9"); // # of kernels
+    mu_assert(l->outputDimensions[2] == 3, "outputCount initalize to 9"); // # of kernels
 
     return NULL;
 }
@@ -79,14 +79,15 @@ char* test_nn_layer_create_convolutional()
     int str[3] = {1, 1, 1};
 
     nn_layer_convolutional_t* l = nn_layer_create_convolutional(
-        linear_activation, 50, 3, 1, dim, pad, str, siz);
+        linear_activation, sum_of_products_integration, 50, 3, 1, dim, pad, str, siz);
 
     mu_assert(l->inputCount == 50, "inputCount init to 25");
     mu_assert(l->outputCount == 50, "outputCount init to 50");
     mu_assert(l->inputDimensionCount == 3, "dimensionCount init to 3");
+    mu_assert(l->outputDimensions[0] == l->kernelCount, "outputDimensions[0] == kernelCount")
     for (int i = 0; i < 3; i++) {
         mu_assert(l->inputDimensions[i] == dim[i], "inputDimensions to be intialized");
-        mu_assert(l->outputDimensions[i] == (dim[i] + 2 * pad[i] - siz[i]) / str[i] + 1, "inputDimensions to be intialized");
+        mu_assert(l->outputDimensions[i + 1] == (dim[i] + 2 * pad[i] - siz[i]) / str[i] + 1, "inputDimensions to be intialized");
         mu_assert(l->padding[i] == pad[i], "Padding to be intialized");
         mu_assert(l->size[i] == siz[i], "Size to be intialized");
         mu_assert(l->stride[i] == str[i], "Stride to be intialized");
@@ -109,7 +110,7 @@ char* test_nn_layer_activate_convolutional()
     int p1[2] = {0,0};
     int t1[2] = {1,1};
     int s1[2] = {2,2};
-    nn_layer_convolutional_t* l1 = nn_layer_create_convolutional(linear_activation, 9, 2, 2, d1, p1, t1, s1);
+    nn_layer_convolutional_t* l1 = nn_layer_create_convolutional(linear_activation, sum_of_products_integration, 9, 2, 2, d1, p1, t1, s1);
 
     float biases[2] = {1, 0};
     l1->biases = biases;
@@ -126,8 +127,11 @@ char* test_nn_layer_activate_convolutional()
     float output[l1->outputCount];
     nn_layer_activate_convolutional(l1, input, output);
 
-    for (int i = 0; i < 8; i++) {
+    for (int i = 0; i < 4; i++) {
         mu_assert(output[i] == 3.0, "Convolutional output should = {3, 3, 3, 3}");
+    }
+    for (int i = 4; i < 8; i++) {
+        mu_assert(output[i] == 2.0, "Convolutional output should = {3, 3, 3, 3}");
     }
 
     return NULL;
@@ -139,7 +143,7 @@ char* test_nn_layer_activate_padded_convolutional()
     int p1[2] = {1,1};
     int t1[2] = {1,1};
     int s1[2] = {2,2};
-    nn_layer_convolutional_t* l1 = nn_layer_create_convolutional(linear_activation, 9, 2, 1, d1, p1, t1, s1);
+    nn_layer_convolutional_t* l1 = nn_layer_create_convolutional(linear_activation, sum_of_products_integration, 9, 2, 1, d1, p1, t1, s1);
 
     float biases[1] = {0};
     l1->biases = biases;
@@ -186,7 +190,7 @@ char* test_nn_layer_activate_maxpool_convolutional()
     int p1[2] = {0,0};
     int t1[2] = {2,2};
     int s1[2] = {2,2};
-    nn_layer_convolutional_t* l1 = nn_layer_create_convolutional(linear_activation, 9, 2, 1, d1, p1, t1, s1);
+    nn_layer_convolutional_t* l1 = nn_layer_create_convolutional(linear_activation, sum_of_products_integration, 9, 2, 1, d1, p1, t1, s1);
     l1->integration = max_integration;
     float input[16] = { 0, 1, 2, 0,
                        1, 0, 0, 3,
@@ -209,7 +213,7 @@ char* test_nn_layer_convolutional_is_index_padding()
     int p1[2] = {0,0};
     int t1[2] = {1,1};
     int s1[2] = {2,2};
-    nn_layer_convolutional_t* l1 = nn_layer_create_convolutional(linear_activation, 4, 2, 1, d1, p1, t1, s1);
+    nn_layer_convolutional_t* l1 = nn_layer_create_convolutional(linear_activation, sum_of_products_integration, 4, 2, 1, d1, p1, t1, s1);
 
     int in[2] = { -1, -1 };
     mu_assert(nn_layer_convolutional_is_index_padding(l1, in) == true, "Expected index to be included in padding");
@@ -245,17 +249,36 @@ char* test_nn_layer_convolutional_is_index_padding()
     return NULL;
 }
 
+char* test_nn_layer_create_connected()
+{
+    nn_layer_convolutional_t* l = nn_layer_create_connected(linear_activation, sum_of_products_integration, 1, 1);
+    mu_assert(l->inputCount == 1, "inputCount initalize to 1");
+    mu_assert(l->outputCount == 1, "outputCount initalize to 1");
+    mu_assert(l->activation == linear_activation, "linear_activation activation function");
+    mu_assert(l->biases[0] == 0.0, "1 bias");
+    mu_assert(l->weights[0][0] == 0.0, "1 weight");
+    
+    float* output = calloc(1, sizeof(float));
+    float input[1] = {1};
+    nn_layer_activate_convolutional(l, input, output);
+    mu_assert(output[0] == 0.0, "Expected output to be 0.0");
+    free(output);
+    
+    return NULL;
+}
+
 char *all_tests() {
     mu_suite_start();
 
     mu_run_test(test_nn_ii2di);
     mu_run_test(test_nn_di2ii);
-    // mu_run_test(test_nn_layer_init_convolutional);
-    // mu_run_test(test_nn_layer_create_convolutional);
+    mu_run_test(test_nn_layer_init_convolutional);
+    mu_run_test(test_nn_layer_create_convolutional);
     mu_run_test(test_nn_layer_activate_convolutional);
-    // mu_run_test(test_nn_layer_activate_padded_convolutional);
-    // mu_run_test(test_nn_layer_convolutional_is_index_padding);
-    // mu_run_test(test_nn_layer_activate_maxpool_convolutional);
+    mu_run_test(test_nn_layer_activate_padded_convolutional);
+    mu_run_test(test_nn_layer_convolutional_is_index_padding);
+    mu_run_test(test_nn_layer_activate_maxpool_convolutional);
+    mu_run_test(test_nn_layer_create_connected);
 
     return NULL;
 }

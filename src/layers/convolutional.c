@@ -13,13 +13,13 @@ void nn_layer_init_convolutional(nn_layer_convolutional_t *l)
         l->outputCount = 0;
     } else {
         l->outputCount = 1;
-        
-        for (int i = 0; i < l->inputDimensionCount; i++) {
-            l->outputDimensions[i] = ((l->inputDimensions[i] + 2 * l->padding[i] - l->size[i]) / l->stride[i] + 1);
-            l->outputCount = l->outputCount * l->outputDimensions[i];
-        }
-        l->outputDimensions[l->outputDimensionCount - 1] = l->kernelCount;
+
+        l->outputDimensions[0] = l->kernelCount;
         l->outputCount = l->outputCount * l->kernelCount;
+        for (int i = 0; i < l->inputDimensionCount; i++) {
+            l->outputDimensions[i + 1] = ((l->inputDimensions[i] + 2 * l->padding[i] - l->size[i]) / l->stride[i] + 1);
+            l->outputCount = l->outputCount * l->outputDimensions[i + 1];
+        }
     }
 
     // TODO: Initalize the biases of the kernels using a better distribution
@@ -40,21 +40,22 @@ void nn_layer_init_convolutional(nn_layer_convolutional_t *l)
     }
 }
 
-nn_layer_convolutional_t* nn_layer_create_convolutional(nn_activation_fn f, int i, int d, int k, int* ds, int* p, int* st, int* sz)
+nn_layer_convolutional_t* nn_layer_create_convolutional(nn_activation_fn fa, nn_integration_fn fi, int ic, int dc, int kc, int* ds, int* p, int* st, int* sz)
 {
     nn_layer_convolutional_t* l = calloc(1, sizeof(nn_layer_convolutional_t));
-    l->activation = f;
-    l->inputCount = i;
-    l->inputDimensionCount = d;
-    l->kernelCount = k;
+    l->activation = fa;
+    l->integration = fi;
+    l->inputCount = ic;
+    l->inputDimensionCount = dc;
+    l->kernelCount = kc;
 
-    l->inputDimensions = calloc(d, sizeof(int));
-    l->outputDimensions = calloc(d + 1, sizeof(int));
-    l->padding = calloc(d, sizeof(int));
-    l->stride = calloc(d, sizeof(int));
-    l->size = calloc(d, sizeof(int));
+    l->inputDimensions = calloc(dc, sizeof(int));
+    l->outputDimensions = calloc(dc + 1, sizeof(int));
+    l->padding = calloc(dc, sizeof(int));
+    l->stride = calloc(dc, sizeof(int));
+    l->size = calloc(dc, sizeof(int));
 
-    for (int i = 0; i < d; i++) {
+    for (int i = 0; i < dc; i++) {
         l->inputDimensions[i] = ds[i];
         l->padding[i] = p[i];
         l->stride[i] = st[i];
@@ -62,6 +63,17 @@ nn_layer_convolutional_t* nn_layer_create_convolutional(nn_activation_fn f, int 
     }
 
     nn_layer_init_convolutional(l);
+    return l;
+}
+
+nn_layer_convolutional_t* nn_layer_create_connected(nn_activation_fn a, nn_integration_fn i, int ic, int oc)
+{
+    int dim[1] = {ic};
+    int pad[1] = {0};
+    int str[1] = {1};
+    int siz[1] = {ic};
+
+    nn_layer_convolutional_t* l = nn_layer_create_convolutional(a, i, ic, 1, oc, dim, pad, str, siz);
     return l;
 }
 
@@ -82,6 +94,7 @@ void nn_layer_destroy_convolutional(nn_layer_convolutional_t* l)
     free(l);
 }
 
+// Activate the layer
 void nn_layer_activate_convolutional(nn_layer_convolutional_t *l, float* input, float* output)
 {
     int** kernelTransform = calloc(l->weightCount, sizeof(int*));
@@ -102,7 +115,7 @@ void nn_layer_activate_convolutional(nn_layer_convolutional_t *l, float* input, 
         // inputCenter = a \circ b + c - p, where a = outputIndex, b = stride, c = kernel center, p = padding
         int inputCenter[l->inputDimensionCount];
         for (int j = 0; j < l->inputDimensionCount; j++) {
-            inputCenter[j] = outputIndex[j] * l->stride[j] + kernelCenter[j] - l->padding[j];
+            inputCenter[j] = outputIndex[j + 1] * l->stride[j] + kernelCenter[j] - l->padding[j];
         }
         
         // inputCenter times every element in the kernel transform gives us our inputIndexes
@@ -122,7 +135,7 @@ void nn_layer_activate_convolutional(nn_layer_convolutional_t *l, float* input, 
             }
         }
 
-        int kernelIndex = outputIndex[l->outputDimensionCount - 1];
+        int kernelIndex = outputIndex[0];
         float bias = l->biases[kernelIndex];
         float* weights = l->weights[kernelIndex];
         output[i] = l->activation(l->integration(l->weightCount, weights, kernelInput) + bias);

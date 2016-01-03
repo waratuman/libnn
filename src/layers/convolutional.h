@@ -26,6 +26,7 @@ void nn_layer_init_convolutional(nn_layer_convolutional_t *layer);
 
 nn_layer_convolutional_t* nn_layer_create_convolutional(
     nn_activation_fn activation,
+    nn_integration_fn integration,
     int inputCount,
     int inputDimensionCount,
     int kernelCount,
@@ -34,11 +35,21 @@ nn_layer_convolutional_t* nn_layer_create_convolutional(
     int* kernel_stride,
     int* kernel_size
 );
+    
+nn_layer_convolutional_t* nn_layer_create_connected(
+    nn_activation_fn activation,
+    nn_integration_fn integration,
+    int inputCount,
+    int outputCount
+);
+
 
 void nn_layer_destroy_convolutional(
     nn_layer_convolutional_t* layer
 );
 
+// The output has an extra dimension (first dimension, index 0),
+// which is the number for kernels.
 void nn_layer_activate_convolutional(
     nn_layer_convolutional_t *layer,
     float* input,
