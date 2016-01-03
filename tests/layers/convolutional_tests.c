@@ -109,9 +109,9 @@ char* test_nn_layer_activate_convolutional()
     int p1[2] = {0,0};
     int t1[2] = {1,1};
     int s1[2] = {2,2};
-    nn_layer_convolutional_t* l1 = nn_layer_create_convolutional(linear_activation, 9, 2, 1, d1, p1, t1, s1);
+    nn_layer_convolutional_t* l1 = nn_layer_create_convolutional(linear_activation, 9, 2, 2, d1, p1, t1, s1);
 
-    float biases[1] = {1};
+    float biases[2] = {1, 0};
     l1->biases = biases;
     for (int k = 0; k < l1->kernelCount; k++) {
         for (int i = 0; i < 4; i++) {
@@ -126,7 +126,7 @@ char* test_nn_layer_activate_convolutional()
     float output[l1->outputCount];
     nn_layer_activate_convolutional(l1, input, output);
 
-    for (int i = 0; i < 4; i++) {
+    for (int i = 0; i < 8; i++) {
         mu_assert(output[i] == 3.0, "Convolutional output should = {3, 3, 3, 3}");
     }
 
