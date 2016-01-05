@@ -1,7 +1,6 @@
 #include "minunit.h"
 #include "utils.h"
 #include "layer.h"
-#include "layers/convolutional.h"
 
 char* test_nn_ii2di()
 {
@@ -15,7 +14,6 @@ char* test_nn_ii2di()
         expected[0] = i / (5 * 2);
         expected[1] = (i - (expected[0] * (5 * 2))) / 2;
         expected[2] = (i - (expected[0] * (5 * 2)) - (expected[1] * 2));
-        // printf("%i, (%i, %i, %i)\t(%i, %i, %i)\n", i, expected[0], expected[1], expected[2], result[0], result[1], result[2]);
 
         for (int j = 0; j < 3; j++) {
             mu_assert(expected[j] == result[j], "Incorrect mapping for nn_ii2di");
@@ -42,10 +40,10 @@ char* test_nn_di2ii()
     return NULL;
 }
 
-char* test_nn_layer_init_convolutional()
+char* test_nn_layer_init()
 {
-    nn_layer_convolutional_t* l = calloc(1, sizeof(nn_layer_convolutional_t));
-    nn_layer_init_convolutional(l);
+    nn_layer_t* l = calloc(1, sizeof(nn_layer_t));
+    nn_layer_init(l);
     mu_assert(l->outputCount == 0, "outputCount initalize to 0");
 
     int dim[2] = {5, 5};
@@ -61,7 +59,7 @@ char* test_nn_layer_init_convolutional()
     l->padding = pad;
     l->size = size;
     l->stride = stride;
-    nn_layer_init_convolutional(l);
+    nn_layer_init(l);
 
     mu_assert(l->outputCount == 9 * l->kernelCount, "outputCount initalize to 9");
     mu_assert(l->outputDimensions[0] == l->kernelCount, "outputCount initalize to 9");
@@ -78,7 +76,7 @@ char* test_nn_layer_create_convolutional()
     int siz[3] = {3, 3, 1};
     int str[3] = {1, 1, 1};
 
-    nn_layer_convolutional_t* l = nn_layer_create_convolutional(
+    nn_layer_t* l = nn_layer_create(
         linear_activation, sum_of_products_integration, 50, 3, 1, dim, pad, str, siz);
 
     mu_assert(l->inputCount == 50, "inputCount init to 25");
@@ -110,7 +108,7 @@ char* test_nn_layer_activate_convolutional()
     int p1[2] = {0,0};
     int t1[2] = {1,1};
     int s1[2] = {2,2};
-    nn_layer_convolutional_t* l1 = nn_layer_create_convolutional(linear_activation, sum_of_products_integration, 9, 2, 2, d1, p1, t1, s1);
+    nn_layer_t* l1 = nn_layer_create(linear_activation, sum_of_products_integration, 9, 2, 2, d1, p1, t1, s1);
 
     float biases[2] = {1, 0};
     l1->biases = biases;
@@ -125,7 +123,7 @@ char* test_nn_layer_activate_convolutional()
                        0, 1, 0 };
 
     float output[l1->outputCount];
-    nn_layer_activate_convolutional(l1, input, output);
+    nn_layer_activate(l1, input, output);
 
     for (int i = 0; i < 4; i++) {
         mu_assert(output[i] == 3.0, "Convolutional output should = {3, 3, 3, 3}");
@@ -143,7 +141,7 @@ char* test_nn_layer_activate_padded_convolutional()
     int p1[2] = {1,1};
     int t1[2] = {1,1};
     int s1[2] = {2,2};
-    nn_layer_convolutional_t* l1 = nn_layer_create_convolutional(linear_activation, sum_of_products_integration, 9, 2, 1, d1, p1, t1, s1);
+    nn_layer_t* l1 = nn_layer_create(linear_activation, sum_of_products_integration, 9, 2, 1, d1, p1, t1, s1);
 
     float biases[1] = {0};
     l1->biases = biases;
@@ -167,7 +165,7 @@ char* test_nn_layer_activate_padded_convolutional()
     };
 
     float output[l1->outputCount];
-    nn_layer_activate_convolutional(l1, input, output);
+    nn_layer_activate(l1, input, output);
 
     for (int i = 0; i < 16; i++) {
         mu_assert(output[i] == expected_output[i], "Convolutional output should = {0, 1, 1...}");
@@ -175,7 +173,7 @@ char* test_nn_layer_activate_padded_convolutional()
 
     float biases2[1] = {1};
     l1->biases = biases2;
-    nn_layer_activate_convolutional(l1, input, output);
+    nn_layer_activate(l1, input, output);
     for (int i = 0; i < 16; i++) {
         mu_assert(output[i] == expected_output[i] + 1, "Convolutional output should = {1, 2, 2...}");
     }
@@ -190,7 +188,7 @@ char* test_nn_layer_activate_maxpool_convolutional()
     int p1[2] = {0,0};
     int t1[2] = {2,2};
     int s1[2] = {2,2};
-    nn_layer_convolutional_t* l1 = nn_layer_create_convolutional(linear_activation, sum_of_products_integration, 9, 2, 1, d1, p1, t1, s1);
+    nn_layer_t* l1 = nn_layer_create(linear_activation, sum_of_products_integration, 9, 2, 1, d1, p1, t1, s1);
     l1->integration = max_integration;
     float input[16] = { 0, 1, 2, 0,
                        1, 0, 0, 3,
@@ -198,7 +196,7 @@ char* test_nn_layer_activate_maxpool_convolutional()
                       -1, 0, 4, 0 };
     float expected_output[4] = { 1, 3, 0, 4 };
     float output[l1->outputCount];
-    nn_layer_activate_convolutional(l1, input, output);
+    nn_layer_activate(l1, input, output);
 
     for (int i = 0; i < 4; i++) {
         mu_assert(output[i] == expected_output[i], "MaxPool output should = {1, 3, 0, 4}");
@@ -213,45 +211,45 @@ char* test_nn_layer_convolutional_is_index_padding()
     int p1[2] = {0,0};
     int t1[2] = {1,1};
     int s1[2] = {2,2};
-    nn_layer_convolutional_t* l1 = nn_layer_create_convolutional(linear_activation, sum_of_products_integration, 4, 2, 1, d1, p1, t1, s1);
+    nn_layer_t* l1 = nn_layer_create(linear_activation, sum_of_products_integration, 4, 2, 1, d1, p1, t1, s1);
 
     int in[2] = { -1, -1 };
-    mu_assert(nn_layer_convolutional_is_index_padding(l1, in) == true, "Expected index to be included in padding");
+    mu_assert(nn_layer_is_index_padding(l1, in) == true, "Expected index to be included in padding");
 
     in[0] = -1;
     in[1] = 0;
-    mu_assert(nn_layer_convolutional_is_index_padding(l1, in) == true, "Expected index to be included in padding");
+    mu_assert(nn_layer_is_index_padding(l1, in) == true, "Expected index to be included in padding");
 
     in[0] = 0;
     in[1] = -1;
-    mu_assert(nn_layer_convolutional_is_index_padding(l1, in) == true, "Expected index to be included in padding");
+    mu_assert(nn_layer_is_index_padding(l1, in) == true, "Expected index to be included in padding");
 
     in[0] = 0;
     in[1] = 0;
-    mu_assert(nn_layer_convolutional_is_index_padding(l1, in) == false, "Expected index to be included in padding");
+    mu_assert(nn_layer_is_index_padding(l1, in) == false, "Expected index to be included in padding");
 
     in[0] = 2;
     in[1] = 2;
-    mu_assert(nn_layer_convolutional_is_index_padding(l1, in) == true, "Expected index to be included in padding");
+    mu_assert(nn_layer_is_index_padding(l1, in) == true, "Expected index to be included in padding");
 
     in[0] = 2;
     in[1] = 1;
-    mu_assert(nn_layer_convolutional_is_index_padding(l1, in) == true, "Expected index to be included in padding");
+    mu_assert(nn_layer_is_index_padding(l1, in) == true, "Expected index to be included in padding");
 
     in[0] = 1;
     in[1] = 2;
-    mu_assert(nn_layer_convolutional_is_index_padding(l1, in) == true, "Expected index to be included in padding");
+    mu_assert(nn_layer_is_index_padding(l1, in) == true, "Expected index to be included in padding");
 
     in[0] = 1;
     in[1] = 1;
-    mu_assert(nn_layer_convolutional_is_index_padding(l1, in) == false, "Expected index to be included in padding");
+    mu_assert(nn_layer_is_index_padding(l1, in) == false, "Expected index to be included in padding");
 
     return NULL;
 }
 
 char* test_nn_layer_create_connected()
 {
-    nn_layer_convolutional_t* l = nn_layer_create_connected(linear_activation, sum_of_products_integration, 1, 1);
+    nn_layer_t* l = nn_layer_create_connected(linear_activation, sum_of_products_integration, 1, 1);
     mu_assert(l->inputCount == 1, "inputCount initalize to 1");
     mu_assert(l->outputCount == 1, "outputCount initalize to 1");
     mu_assert(l->activation == linear_activation, "linear_activation activation function");
@@ -260,7 +258,7 @@ char* test_nn_layer_create_connected()
     
     float* output = calloc(1, sizeof(float));
     float input[1] = {1};
-    nn_layer_activate_convolutional(l, input, output);
+    nn_layer_activate(l, input, output);
     mu_assert(output[0] == 0.0, "Expected output to be 0.0");
     free(output);
     
@@ -272,7 +270,7 @@ char *all_tests() {
 
     mu_run_test(test_nn_ii2di);
     mu_run_test(test_nn_di2ii);
-    mu_run_test(test_nn_layer_init_convolutional);
+    mu_run_test(test_nn_layer_init);
     mu_run_test(test_nn_layer_create_convolutional);
     mu_run_test(test_nn_layer_activate_convolutional);
     mu_run_test(test_nn_layer_activate_padded_convolutional);
@@ -284,18 +282,3 @@ char *all_tests() {
 }
 
 RUN_TESTS(all_tests);
-
-
-
-// // Convolutional layers apply a kernel to the input and produce a resulting output.
-// typedef struct {
-//     int inputs;          // Number of inputs
-//     int outputs;         // Number of outputs
-//
-//     nn_kernel_t* kernel; // The kernel to apply
-// } nn_layer_convolutional_t;
-//
-// void nn_layer_init_convolutional(nn_layer_convolutional_t *layer);
-// nn_layer_convolutional_t* nn_layer_create_convolutional(nn_kernel_t* kernel, int inputs);
-// void nn_layer_destroy_convolutional(nn_layer_convolutional_t* layer);
-// void nn_layer_activate_convolutional(nn_layer_convolutional_t *l, float* input, float* output);

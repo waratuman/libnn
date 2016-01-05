@@ -1,10 +1,11 @@
 #include <stdlib.h>
+
 #include "utils.h"
+#include "layer.h"
 #include "kernel.h"
-#include "convolutional.h"
 
 // \prod_{i=1}^{n}\left(\frac{d_i + 2p_i - k_i}{s_i} + 1\right)
-void nn_layer_init_convolutional(nn_layer_convolutional_t *l)
+void nn_layer_init(nn_layer_t *l)
 {
     l->outputDimensionCount = l->inputDimensionCount + 1;
 
@@ -40,9 +41,9 @@ void nn_layer_init_convolutional(nn_layer_convolutional_t *l)
     }
 }
 
-nn_layer_convolutional_t* nn_layer_create_convolutional(nn_activation_fn fa, nn_integration_fn fi, int ic, int dc, int kc, int* ds, int* p, int* st, int* sz)
+nn_layer_t* nn_layer_create(nn_activation_fn fa, nn_integration_fn fi, int ic, int dc, int kc, int* ds, int* p, int* st, int* sz)
 {
-    nn_layer_convolutional_t* l = calloc(1, sizeof(nn_layer_convolutional_t));
+    nn_layer_t* l = calloc(1, sizeof(nn_layer_t));
     l->activation = fa;
     l->integration = fi;
     l->inputCount = ic;
@@ -62,22 +63,22 @@ nn_layer_convolutional_t* nn_layer_create_convolutional(nn_activation_fn fa, nn_
         l->size[i] = sz[i];
     }
 
-    nn_layer_init_convolutional(l);
+    nn_layer_init(l);
     return l;
 }
 
-nn_layer_convolutional_t* nn_layer_create_connected(nn_activation_fn a, nn_integration_fn i, int ic, int oc)
+nn_layer_t* nn_layer_create_connected(nn_activation_fn a, nn_integration_fn i, int ic, int oc)
 {
     int dim[1] = {ic};
     int pad[1] = {0};
     int str[1] = {1};
     int siz[1] = {ic};
 
-    nn_layer_convolutional_t* l = nn_layer_create_convolutional(a, i, ic, 1, oc, dim, pad, str, siz);
+    nn_layer_t* l = nn_layer_create(a, i, ic, 1, oc, dim, pad, str, siz);
     return l;
 }
 
-void nn_layer_destroy_convolutional(nn_layer_convolutional_t* l)
+void nn_layer_destroy(nn_layer_t* l)
 {
     free(l->size);
     free(l->stride);
@@ -95,7 +96,7 @@ void nn_layer_destroy_convolutional(nn_layer_convolutional_t* l)
 }
 
 // Activate the layer
-void nn_layer_activate_convolutional(nn_layer_convolutional_t *l, float* input, float* output)
+void nn_layer_activate(nn_layer_t *l, float* input, float* output)
 {
     int** kernelTransform = calloc(l->weightCount, sizeof(int*));
     for (int i = 0; i < l->weightCount; i++) {
@@ -128,7 +129,7 @@ void nn_layer_activate_convolutional(nn_layer_convolutional_t *l, float* input, 
             // If the inputIndex is in the padded region use the pad value (this prevents us from having to move some data around)
             // TODO: Support other kind of padded values, eg extend, wrap, crop
             // right now we only 0 the edges, which might not be the best way to go for all networks
-            if (nn_layer_convolutional_is_index_padding(l, inputIndex)) {
+            if (nn_layer_is_index_padding(l, inputIndex)) {
                 kernelInput[j] = 0.0;
             } else { // else use the input
                 kernelInput[j] = input[nn_di2ii(l->inputDimensionCount, l->inputDimensions, inputIndex)];
@@ -149,7 +150,7 @@ void nn_layer_activate_convolutional(nn_layer_convolutional_t *l, float* input, 
     free(kernelCenter);
 }
 
-bool nn_layer_convolutional_is_index_padding(nn_layer_convolutional_t *l, int* in)
+bool nn_layer_is_index_padding(nn_layer_t *l, int* in)
 {
     for (int i = 0; i < l->inputDimensionCount; i++) {
         if (in[i] < 0 || in[i] >= l->inputDimensions[i]) {
