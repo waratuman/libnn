@@ -3,9 +3,9 @@
 typedef struct {
     int layerCount;
 
-    nn_layer_t* layers;
+    nn_layer_t** layers;
 
-    nn_integration_fn loss;  // Error / Loss function (defaults to the sum of squares)
+    nn_integration_fn loss;   // Error / Loss function (defaults to the sum of squares)
 
     float** activations;      // The stored node activations (for backpropagation)
     float** derivatives;      // The stored node activation derivatives (for backpropagation)
@@ -15,9 +15,10 @@ void nn_network_init(nn_network_t *network);
 
 nn_network_t* nn_network_create(
     int layerCount,
-    nn_layer_t* layers
+    nn_layer_t** layers
 );
-    
+
+// Note: Will also call destroy on any layers
 void nn_network_destroy(
     nn_network_t* network
 );

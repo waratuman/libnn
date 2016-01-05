@@ -9,7 +9,7 @@ void nn_network_init(nn_network_t* n)
     }
 }
 
-nn_network_t* nn_network_create(int layerCount, nn_layer_t* layers)
+nn_network_t* nn_network_create(int layerCount, nn_layer_t** layers)
 {
     nn_network_t* n = calloc(1, sizeof(nn_network_t));
 
@@ -23,6 +23,9 @@ nn_network_t* nn_network_create(int layerCount, nn_layer_t* layers)
 
 void nn_network_destroy(nn_network_t* n)
 {
+    for (int i = 0; i < n->layerCount; i++) {
+        nn_layer_destroy(n->layers[i]);
+    }
     free(n);
 }
 
@@ -34,11 +37,11 @@ void nn_network_activate(nn_network_t *n, float* input, float* output)
     layerInputs[0] = input;
     
     for (int i = 0; i < n->layerCount - 1; i++) {
-        layerInputs[i + 1] = calloc(n->layers[i + 1].inputCount, sizeof(float));
-        nn_layer_activate(&n->layers[i], layerInputs[i], layerInputs[i + 1]);
+        layerInputs[i + 1] = calloc(n->layers[i + 1]->inputCount, sizeof(float));
+        nn_layer_activate(n->layers[i], layerInputs[i], layerInputs[i + 1]);
     }
 
-    nn_layer_activate(&n->layers[n->layerCount - 1], layerInputs[n->layerCount - 1], output);
+    nn_layer_activate(n->layers[n->layerCount - 1], layerInputs[n->layerCount - 1], output);
 
     // This function is not responsible for freeing the input
     for (int i = 1; i < n->layerCount - 1; i++) {
@@ -49,8 +52,13 @@ void nn_network_activate(nn_network_t *n, float* input, float* output)
 
 float nn_network_loss(nn_network_t* n, float* input, float* expectedOutput)
 {
-    int lossInputCount = n->layers[n->layerCount - 1].outputCount;
+    int lossInputCount = n->layers[n->layerCount - 1]->outputCount;
     float* lossInput = calloc(lossInputCount, sizeof(float));
     nn_network_activate(n, input, lossInput);
-    return n->loss(lossInputCount, lossInput, expectedOutput);
+
+    float result = n->loss(lossInputCount, lossInput, expectedOutput);
+
+    free(lossInput);
+
+    return result;
 }
