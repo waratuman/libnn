@@ -5,6 +5,8 @@ typedef struct {
 
     nn_layer_t* layers;
 
+    nn_integration_fn loss;  // Error / Loss function (defaults to the sum of squares)
+
     float** activations;      // The stored node activations (for backpropagation)
     float** derivatives;      // The stored node activation derivatives (for backpropagation)
 } nn_network_t;
@@ -26,4 +28,10 @@ void nn_network_activate(
     nn_network_t *network,
     float* input,
     float* output
+);
+
+float nn_network_loss(
+    nn_network_t* network,
+    float* input,
+    float* expectedOutput
 );
