@@ -1,11 +1,19 @@
+#ifndef NETWORK_H
+#define NETWORK_H
+
 #include "layer.h"
+#include "layers/singly_connected.h"
+#include "layers/fully_connected.h"
+#include "layers/convolutional.h"
+
+#include "errors.h"
 
 typedef struct {
     int layerCount;
+    LAYER_TYPE* layerTypes;
+    void** layers;
 
-    nn_layer_t** layers;
-
-    nn_integration_fn loss;   // Error / Loss function (defaults to the sum of squares)
+    nn_error_fn error;   // Error / Loss function (defaults to the sum of squares)
 
     float** activations;      // The stored node activations (for backpropagation)
     float** derivatives;      // The stored node activation derivatives (for backpropagation)
@@ -15,7 +23,8 @@ void nn_network_init(nn_network_t *network);
 
 nn_network_t* nn_network_create(
     int layerCount,
-    nn_layer_t** layers
+    LAYER_TYPE* layerTypes,
+    void** layers
 );
 
 // Note: Will also call destroy on any layers
@@ -34,5 +43,13 @@ void nn_network_activate(
 float nn_network_loss(
     nn_network_t* network,
     float* input,
-    float* expectedOutput
+    float* target
 );
+
+void nn_network_train(
+    nn_network_t* network,
+    float* input,
+    float* target
+);
+    
+#endif

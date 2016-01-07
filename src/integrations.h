@@ -1,3 +1,8 @@
+#ifndef INTEGRATIONS_H
+#define INTEGRATIONS_H
+
+// TODO: Rename to aggragation (integration is may used for the opposite of derivative)
+
 // The weights are passed in as a
 // Input passed in as b
 typedef float (*nn_integration_fn)(int count, float* weights, float* input);
@@ -13,3 +18,5 @@ float sum_of_squares_integration(int n, float* a, float* b);
 // Max (Usefull for max pooling in a convolutional network)
 // max(b)
 float max_integration(int n, float* a, float* b);
+
+#endif
