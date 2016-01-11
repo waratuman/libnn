@@ -1,16 +1,16 @@
 uname_S := $(shell sh -c 'uname -s 2>/dev/null || echo not')
 
 # augment via OPTFLAGS
-CFLAGS=-g -O2 -Wall -Wextra -Wpedantic -Isrc -rdynamic -Wstrict-overflow -fno-strict-aliasing -DNDEBUG $(OPTFLAGS)
+CFLAGS=-g -O2 -Wall -Wextra -Wpedantic -Wno-gnu-zero-variadic-macro-arguments -Isrc -rdynamic -Wstrict-overflow -fno-strict-aliasing -DNDEBUG $(OPTFLAGS)
 
 # augment linking options via OPTLIBS
 LDLIBS=-ldl -lm -lblas $(OPTLIBS)
 
 # CBLAS
 ifeq ($(uname_S),Darwin)
-# LDFLAGS += -L/System/Library/Frameworks/Accelerate.framework/Versions/Current/Frameworks/vecLib.framework/Versions/Current
-# LDLIBS += -l/System/Library/Frameworks/Accelerate.framework/Versions/Current/Frameworks/vecLib.framework/Versions/Current
-CFLAGS += -I/System/Library/Frameworks/Accelerate.framework/Versions/Current/Frameworks/vecLib.framework/Versions/Current/Headers
+	# LDFLAGS += -L/System/Library/Frameworks/Accelerate.framework/Versions/Current/Frameworks/vecLib.framework/Versions/Current
+	# LDLIBS += -l/System/Library/Frameworks/Accelerate.framework/Versions/Current/Frameworks/vecLib.framework/Versions/Current
+	CFLAGS += -I/System/Library/Frameworks/Accelerate.framework/Versions/Current/Frameworks/vecLib.framework/Versions/Current/Headers
 endif
 
 # optional, only applies when user didn't give PREFIX setting

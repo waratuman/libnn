@@ -30,4 +30,4 @@ char *all_tests() {
     return NULL;
 }
 
-RUN_TESTS(all_tests);
+RUN_TESTS(all_tests)
