@@ -88,12 +88,14 @@ void nn_layer_destroy_convolutional(nn_layer_convolutional_t* l)
 // Integrate the layer
 void nn_layer_integrate_convolutional(nn_layer_convolutional_t *l, float* input, float* output)
 {
+    // TODO: Move to init method
     int** kernelTransform = calloc(l->weightCount, sizeof(int*));
     for (int i = 0; i < l->weightCount; i++) {
         kernelTransform[i] = calloc(l->inputDimensionCount, sizeof(int));
     }
     nn_kernel_offset(l->inputDimensionCount, l->size, kernelTransform);
 
+    // TODO: Move to init method
     int* kernelCenter = calloc(l->inputDimensionCount, sizeof(int));
     nn_kernel_center(l->inputDimensionCount, l->size, kernelCenter);
 
@@ -128,7 +130,9 @@ void nn_layer_integrate_convolutional(nn_layer_convolutional_t *l, float* input,
         int kernelIndex = outputIndex[0];
         float bias = l->biases[kernelIndex];
         float* weights = l->weights[kernelIndex];
-        output[i] = l->integration(l->weightCount, weights, kernelInput) + bias;
+
+        float* integrationInputs[2] = {kernelInput, weights};
+        output[i] = l->integration(l->weightCount, integrationInputs) + bias;
     }
     free(kernelInput);
 
@@ -144,7 +148,7 @@ void nn_layer_activate_convolutional(nn_layer_convolutional_t *l, float* input, 
 {
     nn_layer_integrate_convolutional(l, input, output);
     for (int i = 0; i < l->outputCount; i++) {
-        output[i] = l->activation(output[i], 0);
+        output[i] = l->activation(&output[i], 0);
     }
 }
 

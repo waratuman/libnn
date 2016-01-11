@@ -1,3 +1,5 @@
+#pragma once
+
 // Calculates the dot product of the vectors a and b (a \cdotp b)
 //
 //  n: The number of elements in the vectors a, b

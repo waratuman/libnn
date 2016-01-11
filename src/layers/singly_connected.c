@@ -40,6 +40,6 @@ void nn_layer_activate_singly_connected(nn_layer_singly_connected_t *l, float* i
 {
     nn_layer_integrate_singly_connected(l, input, output);
     for (int i = 0; i < l->inputCount; i++) {
-        output[i] = l->activation(output[i], 0);
+        output[i] = l->activation(&output[i], 0);
     }
 }

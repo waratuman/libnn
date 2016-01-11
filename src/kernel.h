@@ -1,3 +1,5 @@
+#pragma once
+
 /* The kernel offset is the difference between any element and the center of the
 kernel. This is usefull for calculating the input into the kernel given the
 center input index of the kernel.

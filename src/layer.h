@@ -1,6 +1,5 @@
 // Ref: http://page.mi.fu-berlin.de/rojas/neural/
-#ifndef LAYER_H
-#define LAYER_H
+#pragma once
 
 typedef enum {
     LOSS,
@@ -22,5 +21,3 @@ void nn_layer_derivate(LAYER_TYPE type, void* layer, float* input, float* output
 int nn_layer_input_count(LAYER_TYPE type, void* layer);
 
 int nn_layer_output_count(LAYER_TYPE type, void* layer);
-
-#endif

@@ -1,5 +1,4 @@
-#ifndef NETWORK_H
-#define NETWORK_H
+#pragma once
 
 #include "layer.h"
 #include "layers/singly_connected.h"
@@ -51,5 +50,3 @@ void nn_network_train(
     float* input,
     float* target
 );
-    
-#endif

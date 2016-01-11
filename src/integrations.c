@@ -1,27 +1,36 @@
 #include "utils.h"
 #include "math.h"
 
-float sum_of_products_integration(int n, float* a, float* b)
+float sum_of_products_integration(int n, float** args)
 {
-    return nn_sdot(n, a, 1, b, 1);
+    return nn_sdot(n, args[0], 1, args[1], 1);
 }
 
-float sum_of_squares_integration(int n, float* a, float* b)
+float euclidean_integration(int n, float** args)
 {
     float result = 0;
     for (int i = 0; i < n; i++) {
-        result = result + pow(a[i] - b[i], 2);
+        result = result + pow(args[0][i] - args[1][i], 2);
     }
     return result * (1 / (2 * (float)n));
 }
 
-float max_integration(int n, float* a, float* b)
+float sum_of_squares(int n, float** args)
+{
+    float result = 0;
+    for (int i = 0; i < n; i++) {
+        result = result + pow(args[0][i], 2);
+    }
+    return result;
+}
+
+float max_integration(int n, float** args)
 {
     int max = 0;
     for (int i = 0; i < n; i++) {
-        if (b[i] > b[max]) {
+        if (args[0][i] > args[0][max]) {
             max = i;
         }
     }
-    return b[max];
+    return args[0][max];
 }

@@ -1,5 +1,4 @@
-#ifndef LAYER_LOSS_H
-#define LAYER_LOSS_H
+#pragma once
 
 typedef struct {
     int inputCount;                 // Number of inputs
@@ -17,5 +16,3 @@ void nn_layer_integrate_loss(nn_layer_loss_t *layer, float* input, float* output
 
 // output: The targeted output (expected output)
 float nn_layer_activate_loss(nn_layer_loss_t *layer, float* input, float* output);
-
-#endif

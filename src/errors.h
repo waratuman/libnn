@@ -1,3 +1,5 @@
+#pragma once
+
 // The derivative paramter is the nth derivative of the function:
 // - 0 is the function
 // - 1 is the first derivative

@@ -1,7 +1,7 @@
-#ifndef ACTIVATIONS_H
-#define ACTIVATIONS_H
-
 // https://en.wikipedia.org/wiki/Activation_function
+#pragma once
+
+// args is an array of arguments, most functions only expect 1 element in the array
 // The derivative paramter is the nth derivative of the function:
 // - 0 is the function
 // - 1 is the first derivative
@@ -9,12 +9,17 @@
 // - -1 is the first integral
 // - -2 is the sencond integral
 // etc..
-typedef float (*nn_activation_fn)(float x, int derivative);
+typedef float (*nn_activation_fn)(float* args, int derivative);
 
 // Identity / Linear
-// f(x) = x
-// f'(x) = 1
-float linear_activation(float x, int derivative);
+// f(x) &= x
+// f'(x) &= 1
+float linear_activation(float* args, int derivative);
+
+// Squared
+// f(x) &= x^2
+// f'(x) &= 2x
+float squared_activation(float* args, int d);
 
 // Binary Step
 // f(x) = \left \{	\begin{array}{rcl}
@@ -23,17 +28,17 @@ float linear_activation(float x, int derivative);
 // f'(x) = \left \{    \begin{array}{rcl}
 //     0 & \mbox{for} & x \ne 0\\
 //     ? & \mbox{for} & x = 0\end{array} \right.
-float binary_step(float x, int derivative);
+float binary_step(float* args, int derivative);
 
 // Logistic / Sigmoid / SoftStep
 // f(x)=\frac{1}{1+e^{-x}}
 // f'(x)=f(x)(1-f(x))
-float sigmoid_activation(float x, int derivative);
+float sigmoid_activation(float* args, int derivative);
 
 // TanH
 // f(x)=\tanh(x)=\frac{2}{1+e^{-2x}}-1
 // f'(x)=1-f(x)^2
-float tanh_activation(float x, int derivative);
+float tanh_activation(float* args, int derivative);
 
 // ArcTan
 // f(x)=\tan^{-1}(x)
@@ -46,7 +51,7 @@ float tanh_activation(float x, int derivative);
 // f'(x) = \left \{	\begin{array}{rcl}
 //     0 & \mbox{for} & x < 0\\
 //     1 & \mbox{for} & x \ge 0\end{array} \right.
-float rectified_linear(float x, int derivative);
+float rectified_linear(float* args, int derivative);
 
 // SoftPlus
 // f(x)=\log_e(1+e^x)
@@ -81,21 +86,24 @@ float rectified_linear(float x, int derivative);
 // f(x)=e^{-x^2}
 // f'(x)=-2xe^{-x^2}
 
-// Noisy Rectified Lineau Unit
+// Noisy Rectified Linear Unit
 // https://en.wikipedia.org/wiki/Rectifier_(neural_networks)
 // Y \sim \mathcal{N}(0, \sigma(x))
 // f(x) = \max(0, x + Y)
 // f'(x) = 
 
-// Leaky Rectified Lineau Unit
+// Leaky Rectified Linear Unit
 // https://en.wikipedia.org/wiki/Rectifier_(neural_networks)
-// f(x)  = \begin{cases}
+// f(\alpha, x)  &= \begin{cases}
 //     x & \mbox{if } x > 0 \\
-//     a x & \mbox{otherwise}
+//     \alpha x & \mbox{otherwise}
+// \end{cases}\\
+// f'(\alpha, x)  &= \begin{cases}
+//     1 & \mbox{if } x > 0 \\
+//     \alpha & \mbox{otherwise}
 // \end{cases}
-
+float leaky_rectified_linear_unit(float* args, int derivative);
 
 // Softmax
 // https://en.wikipedia.org/wiki/Softmax_function
 
-#endif

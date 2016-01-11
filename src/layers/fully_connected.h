@@ -1,6 +1,3 @@
-#ifndef LAYER_FULLY_CONNECTED_H
-#define LAYER_FULLY_CONNECTED_H
-
 /*
 Fully connected layers connect every input to every output using a integration
 function. For each output a given activation function is applied. The integration
@@ -26,6 +23,7 @@ Where i is the ith output, j is the jth input, n is the number of
 inputs, w_ij is the weight associated between the ith ouput and jth
 input, i_j is the jth input and b_i is the bias of the ith output.
 */
+#pragma once
 
 #include "layer.h"
 #include "activations.h"
@@ -64,5 +62,3 @@ void nn_layer_activate_fully_connected(nn_layer_fully_connected_t *layer, float*
 // void nn_layer_integrate_fully_connected(nn_layer_fully_connected_t *layer, float* input, float* output);
 //
 // void nn_layer_activate_fully_connected(nn_layer_fully_connected_t *layer, float* input, float* output);
-
-#endif

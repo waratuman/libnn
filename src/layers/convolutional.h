@@ -1,5 +1,4 @@
-#ifndef LAYER_CONVOLUTIONAL_H
-#define LAYER_CONVOLUTIONAL_H
+#pragma once
 
 #include <stdbool.h>
 
@@ -69,5 +68,3 @@ bool nn_layer_is_convolutional_index_padding(
     nn_layer_convolutional_t *layer,
     int* index
 );
-
-#endif

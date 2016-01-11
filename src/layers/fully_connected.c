@@ -38,8 +38,10 @@ void nn_layer_destroy_fully_connected(nn_layer_fully_connected_t* l)
 void nn_layer_integrate_fully_connected(nn_layer_fully_connected_t *l, float* input, float* output)
 {
 
+    float* integrationInputs[2] = {input, NULL};
     for (int i = 0; i < l->outputCount; i++) {
-        output[i] = l->integration(l->inputCount, l->weights[i], input) + l->biases[i];
+        integrationInputs[1] = l->weights[i];
+        output[i] = l->integration(l->inputCount, integrationInputs) + l->biases[i];
     }
 }
 
@@ -47,49 +49,6 @@ void nn_layer_activate_fully_connected(nn_layer_fully_connected_t *l, float* inp
 {
     nn_layer_integrate_fully_connected(l, input, output);
     for (int i = 0; i < l->outputCount; i++) {
-        output[i] = l->activation(output[i], 0);
+        output[i] = l->activation(&output[i], 0);
     }
 }
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-// nn_layer_fully_connected_t* nn_layer_create_fully_connected(nn_activation_fn a, nn_integration_fn i, int ic, int oc)
-// {
-//     int dim[1] = {ic};
-//     int pad[1] = {0};
-//     int str[1] = {1};
-//     int siz[1] = {ic};
-//
-//     nn_layer_fully_connected_t* l = (nn_layer_fully_connected_t*)nn_layer_create_convolutional(a, i, ic, 1, oc, dim, pad, str, siz);
-//     return l;
-// }
-//
-// void nn_layer_destroy_fully_connected(nn_layer_fully_connected_t* l)
-// {
-//     nn_layer_destroy_fully_connected((nn_layer_convolutional_t*)l);
-// }
-//
-// void nn_layer_integrate_fully_connected(nn_layer_fully_connected_t *l, float* input, float* output)
-// {
-//     nn_layer_integrate_convolutional((nn_layer_convolutional_t*)l, input, output);
-// }
-//
-// void nn_layer_activate_fully_connected(nn_layer_fully_connected_t *l, float* input, float* output)
-// {
-//     nn_layer_activate_convolutional((nn_layer_convolutional_t*)l, input, output);
-// }
-//

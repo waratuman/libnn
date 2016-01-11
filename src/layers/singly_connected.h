@@ -1,5 +1,4 @@
-#ifndef LAYER_SINGLY_CONNECTED_H
-#define LAYER_SINGLY_CONNECTED_H
+#pragma once
 
 #include "layer.h"
 #include "activations.h"
@@ -24,5 +23,3 @@ void nn_layer_destroy_singly_connected(nn_layer_singly_connected_t* layer);
 void nn_layer_integrate_singly_connected(nn_layer_singly_connected_t *layer, float* input, float* output);
 
 void nn_layer_activate_singly_connected(nn_layer_singly_connected_t *layer, float* input, float* output);
-
-#endif
