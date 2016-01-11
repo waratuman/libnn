@@ -49,3 +49,4 @@ char *all_tests() {
 }
 
 RUN_TESTS(all_tests);
+

@@ -35,3 +35,6 @@ doc/
 
 # Debug files
 *.dSYM/
+
+# Test files
+tests/**/*[!.c]

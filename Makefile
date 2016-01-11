@@ -1,7 +1,7 @@
 uname_S := $(shell sh -c 'uname -s 2>/dev/null || echo not')
 
 # augment via OPTFLAGS
-CFLAGS=-g -O2 -Wall -Wextra -Isrc -rdynamic -Wstrict-overflow -fno-strict-aliasing -DNDEBUG $(OPTFLAGS)
+CFLAGS=-g -O2 -Wall -Wextra -Wpedantic -Isrc -rdynamic -Wstrict-overflow -fno-strict-aliasing -DNDEBUG $(OPTFLAGS)
 
 # augment linking options via OPTLIBS
 LDLIBS=-ldl -lm -lblas $(OPTLIBS)
