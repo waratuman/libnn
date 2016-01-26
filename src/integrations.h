@@ -21,3 +21,7 @@ float sum_of_squares(int n, float** args);
 // Max (Usefull for max pooling in a convolutional network)
 // \max\left(a_0\right)
 float max_integration(int n, float** args);
+
+// Avg (Usefull for avg pooling in a convolutional network)
+// \avg\left(a_0\right)
+float avg_integration(int n, float** args);

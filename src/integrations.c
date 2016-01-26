@@ -34,3 +34,12 @@ float max_integration(int n, float** args)
     }
     return args[0][max];
 }
+
+float avg_integration(int n, float** args)
+{
+    float avg = 0.0;
+    for (int i = 0; i < n; i++) {
+        avg += args[0][i];
+    }
+    return avg / (float)n;
+}

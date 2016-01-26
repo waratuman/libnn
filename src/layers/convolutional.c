@@ -4,6 +4,7 @@
 #include "layer.h"
 #include "kernel.h"
 #include "layers/convolutional.h"
+#include "limits.h"
 
 // \prod_{i=1}^{n}\left(\frac{d_i + 2p_i - k_i}{s_i} + 1\right)
 void nn_layer_init_convolutional(nn_layer_convolutional_t *l)

@@ -49,16 +49,3 @@ void nn_layer_integrate_fully_connected(nn_layer_fully_connected_t *layer, float
 
 void nn_layer_activate_fully_connected(nn_layer_fully_connected_t *layer, float* input, float* output);
 
-
-
-// #include "layers/convolutional.h"
-//
-// typedef nn_layer_convolutional_t nn_layer_fully_connected_t;
-//
-// nn_layer_fully_connected_t* nn_layer_create_fully_connected(nn_activation_fn a, nn_integration_fn i, int inputCount, int outputCount);
-//
-// void nn_layer_destroy_fully_connected(nn_layer_fully_connected_t* layer);
-//
-// void nn_layer_integrate_fully_connected(nn_layer_fully_connected_t *layer, float* input, float* output);
-//
-// void nn_layer_activate_fully_connected(nn_layer_fully_connected_t *layer, float* input, float* output);
