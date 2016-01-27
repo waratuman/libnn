@@ -7,15 +7,15 @@
 
 #include "errors.h"
 
-typedef struct {
+typedef struct nn_network_t {
     int layerCount;
     LAYER_TYPE* layerTypes;
     void** layers;
 
-    nn_error_fn error;   // Error / Loss function (defaults to the sum of squares)
+    nn_error_fn error;      // Error / Loss function (defaults to the sum of squares)
 
-    float** activations;      // The stored node activations (for backpropagation)
-    float** derivatives;      // The stored node activation derivatives (for backpropagation)
+    float** activations;    // The stored node activations (for backpropagation)
+    float** derivatives;    // The stored node activation derivatives (for backpropagation)
 } nn_network_t;
 
 void nn_network_init(nn_network_t *network);
@@ -27,26 +27,12 @@ nn_network_t* nn_network_create(
 );
 
 // Note: Will also call destroy on any layers
-void nn_network_destroy(
-    nn_network_t* network
-);
+void nn_network_destroy(nn_network_t* network);
 
 // Input is the size of the first layer in the network
 // Output is of the size of the last layer in the network
-void nn_network_activate(
-    nn_network_t *network,
-    float* input,
-    float* output
-);
+void nn_network_activate(nn_network_t *network, float* input, float* output);
 
-float nn_network_loss(
-    nn_network_t* network,
-    float* input,
-    float* target
-);
+float nn_network_loss(nn_network_t* network, float* input, float* target);
 
-void nn_network_train(
-    nn_network_t* network,
-    float* input,
-    float* target
-);
+void nn_network_train(nn_network_t* network, float* input, float* target);
