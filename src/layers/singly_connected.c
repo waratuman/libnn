@@ -1,6 +1,5 @@
+#include <nn.h>
 #include <stdlib.h>
-
-#include "layers/singly_connected.h"
 
 void nn_layer_init_singly_connected(nn_layer_singly_connected_t *l)
 {
@@ -28,7 +27,7 @@ void nn_layer_destroy_singly_connected(nn_layer_singly_connected_t* l)
     free(l);
 }
 
-void nn_layer_integrate_singly_connected(nn_layer_singly_connected_t *l, float* input, float* output)
+void nn_layer_aggregate_singly_connected(nn_layer_singly_connected_t *l, float* input, float* output)
 {
     for (int i = 0; i < l->inputCount; i++) {
         output[i] = input[i] + l->biases[i];
@@ -38,7 +37,7 @@ void nn_layer_integrate_singly_connected(nn_layer_singly_connected_t *l, float* 
 
 void nn_layer_activate_singly_connected(nn_layer_singly_connected_t *l, float* input, float* output)
 {
-    nn_layer_integrate_singly_connected(l, input, output);
+    nn_layer_aggregate_singly_connected(l, input, output);
     for (int i = 0; i < l->inputCount; i++) {
         output[i] = l->activation(&output[i], 0);
     }

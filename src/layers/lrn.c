@@ -1,15 +1,13 @@
-#include <stdlib.h>
+#include <nn.h>
 #include <math.h>
+#include <stdlib.h>
 
 #include "utils.h"
-#include "kernel.h"
-#include "layer.h"
-#include "layers/lrn.h"
 
 void nn_layer_init_lrn(nn_layer_lrn_t *l)
 {
     // l->activation = ;
-    l->integration = sum_of_squares;
+    l->aggregation = nn_sos_fn;
     l->outputCount = l->inputCount;
     l->outputDimensionCount = l->inputDimensionCount;
 
@@ -50,7 +48,7 @@ void nn_layer_destroy_lrn(nn_layer_lrn_t* l)
     free(l);
 }
 
-void nn_layer_integrate_lrn(nn_layer_lrn_t *l, float* input, float* output)
+void nn_layer_aggregate_lrn(nn_layer_lrn_t *l, float* input, float* output)
 {
     int** kernelTransform = calloc(l->kernelInputCount, sizeof(int*));
     for (int i = 0; i < l->kernelInputCount; i++) {
@@ -82,7 +80,7 @@ void nn_layer_integrate_lrn(nn_layer_lrn_t *l, float* input, float* output)
             }
         }
 
-        output[i] = l->integration(l->kernelInputCount, &kernelInput);
+        output[i] = l->aggregation(l->kernelInputCount, &kernelInput);
     }
     free(kernelInput);
 
@@ -101,7 +99,7 @@ void nn_layer_integrate_lrn(nn_layer_lrn_t *l, float* input, float* output)
 // }
 void nn_layer_activate_lrn(nn_layer_lrn_t *l, float* input,  float* output)
 {
-    nn_layer_integrate_lrn(l, input, output);
+    nn_layer_aggregate_lrn(l, input, output);
     for (int i = 0; i < l->outputCount; i++) {
         output[i] = input[i] / pow(l->k + l->alpha * output[i], l->beta);
     }

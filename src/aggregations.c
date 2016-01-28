@@ -1,12 +1,15 @@
-#include "utils.h"
-#include "math.h"
+#include <math.h>
 
-float sum_of_products_integration(int n, float** args)
+#include "utils.h"
+
+// Sum of Products Aggregation Function
+float nn_sop_fn(int n, float** args)
 {
     return nn_sdot(n, args[0], 1, args[1], 1);
 }
 
-float euclidean_integration(int n, float** args)
+// Euclidean Aggregation Function
+float nn_euclidean_fn(int n, float** args)
 {
     float result = 0;
     for (int i = 0; i < n; i++) {
@@ -15,7 +18,8 @@ float euclidean_integration(int n, float** args)
     return result * (1 / (2 * (float)n));
 }
 
-float sum_of_squares(int n, float** args)
+// Sum of Squares Aggregation Function
+float nn_sos_fn(int n, float** args)
 {
     float result = 0;
     for (int i = 0; i < n; i++) {
@@ -24,7 +28,8 @@ float sum_of_squares(int n, float** args)
     return result;
 }
 
-float max_integration(int n, float** args)
+// Max Aggregation Function
+float nn_max_fn(int n, float** args)
 {
     int max = 0;
     for (int i = 0; i < n; i++) {
@@ -35,7 +40,8 @@ float max_integration(int n, float** args)
     return args[0][max];
 }
 
-float avg_integration(int n, float** args)
+// Average Aggregation Function
+float nn_avg_fn(int n, float** args)
 {
     float avg = 0.0;
     for (int i = 0; i < n; i++) {

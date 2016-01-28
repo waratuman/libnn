@@ -1,6 +1,6 @@
+#include <nn.h>
+
 #include "minunit.h"
-#include "layer.h"
-#include "layers/convolutional.h"
 
 char* test_nn_layer_init_convolutional()
 {
@@ -39,7 +39,7 @@ char* test_nn_layer_create_convolutional()
     int str[3] = {1, 1, 1};
 
     nn_layer_convolutional_t* l = nn_layer_create_convolutional(
-        linear_activation, sum_of_products_integration, 50, 3, 1, dim, pad, str, siz);
+        nn_linear_fn, nn_sop_fn, 50, 3, 1, dim, pad, str, siz);
 
     mu_assert(l->inputCount == 50, "inputCount init to 25");
     mu_assert(l->outputCount == 50, "outputCount init to 50");
@@ -70,7 +70,7 @@ char* test_nn_layer_activate_convolutional()
     int p1[2] = {0,0};
     int t1[2] = {1,1};
     int s1[2] = {2,2};
-    nn_layer_convolutional_t* l1 = nn_layer_create_convolutional(linear_activation, sum_of_products_integration, 9, 2, 2, d1, p1, t1, s1);
+    nn_layer_convolutional_t* l1 = nn_layer_create_convolutional(nn_linear_fn, nn_sop_fn, 9, 2, 2, d1, p1, t1, s1);
 
     float biases[2] = {1, 0};
     l1->biases = biases;
@@ -103,7 +103,7 @@ char* test_nn_layer_activate_padded_convolutional()
     int p1[2] = {1,1};
     int t1[2] = {1,1};
     int s1[2] = {2,2};
-    nn_layer_convolutional_t* l1 = nn_layer_create_convolutional(linear_activation, sum_of_products_integration, 9, 2, 1, d1, p1, t1, s1);
+    nn_layer_convolutional_t* l1 = nn_layer_create_convolutional(nn_linear_fn, nn_sop_fn, 9, 2, 1, d1, p1, t1, s1);
 
     float biases[1] = {0};
     l1->biases = biases;
@@ -150,8 +150,8 @@ char* test_nn_layer_activate_maxpool_convolutional()
     int p1[2] = {0,0};
     int t1[2] = {2,2};
     int s1[2] = {2,2};
-    nn_layer_convolutional_t* l1 = nn_layer_create_convolutional(linear_activation, sum_of_products_integration, 9, 2, 1, d1, p1, t1, s1);
-    l1->integration = max_integration;
+    nn_layer_convolutional_t* l1 = nn_layer_create_convolutional(nn_linear_fn, nn_sop_fn, 9, 2, 1, d1, p1, t1, s1);
+    l1->aggregation = nn_max_fn;
     float input[16] = { 0, 1, 2, 0,
                        1, 0, 0, 3,
                        0, 0, 1,-3,
@@ -173,7 +173,7 @@ char* test_nn_layer_convolutional_is_index_padding()
     int p1[2] = {0,0};
     int t1[2] = {1,1};
     int s1[2] = {2,2};
-    nn_layer_convolutional_t* l1 = nn_layer_create_convolutional(linear_activation, sum_of_products_integration, 4, 2, 1, d1, p1, t1, s1);
+    nn_layer_convolutional_t* l1 = nn_layer_create_convolutional(nn_linear_fn, nn_sop_fn, 4, 2, 1, d1, p1, t1, s1);
 
     int in[2] = { -1, -1 };
     mu_assert(nn_layer_is_convolutional_index_padding(l1, in) == true, "Expected index to be included in padding");

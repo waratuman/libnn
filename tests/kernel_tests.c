@@ -1,5 +1,5 @@
 #include "minunit.h"
-#include "kernel.h"
+#include "utils.h"
 
 char* test_nn_kernel_offset()
 {

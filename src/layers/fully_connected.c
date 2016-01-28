@@ -1,8 +1,5 @@
+#include <nn.h>
 #include <stdlib.h>
-
-// #include "activations.h"
-#include "layer.h"
-#include "layers/fully_connected.h"
 
 void nn_layer_init_fully_connected(nn_layer_fully_connected_t *l)
 {
@@ -14,11 +11,11 @@ void nn_layer_init_fully_connected(nn_layer_fully_connected_t *l)
     }
 }
 
-nn_layer_fully_connected_t* nn_layer_create_fully_connected(nn_activation_fn a, nn_integration_fn i, int ic, int oc)
+nn_layer_fully_connected_t* nn_layer_create_fully_connected(nn_activation_fn a, nn_aggregation_fn i, int ic, int oc)
 {
     nn_layer_fully_connected_t* l = calloc(1, sizeof(nn_layer_fully_connected_t));
     l->activation = a;
-    l->integration = i;
+    l->aggregation = i;
     l->inputCount = ic;
     l->outputCount = oc;
     nn_layer_init_fully_connected(l);
@@ -35,19 +32,19 @@ void nn_layer_destroy_fully_connected(nn_layer_fully_connected_t* l)
     free(l);
 }
 
-void nn_layer_integrate_fully_connected(nn_layer_fully_connected_t *l, float* input, float* output)
+void nn_layer_aggregate_fully_connected(nn_layer_fully_connected_t *l, float* input, float* output)
 {
 
-    float* integrationInputs[2] = {input, NULL};
+    float* aggregationInputs[2] = {input, NULL};
     for (int i = 0; i < l->outputCount; i++) {
-        integrationInputs[1] = l->weights[i];
-        output[i] = l->integration(l->inputCount, integrationInputs) + l->biases[i];
+        aggregationInputs[1] = l->weights[i];
+        output[i] = l->aggregation(l->inputCount, aggregationInputs) + l->biases[i];
     }
 }
 
 void nn_layer_activate_fully_connected(nn_layer_fully_connected_t *l, float* input, float* output)
 {
-    nn_layer_integrate_fully_connected(l, input, output);
+    nn_layer_aggregate_fully_connected(l, input, output);
     for (int i = 0; i < l->outputCount; i++) {
         output[i] = l->activation(&output[i], 0);
     }

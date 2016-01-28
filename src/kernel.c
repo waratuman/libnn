@@ -1,6 +1,5 @@
 #include <math.h>
 #include "utils.h"
-#include "kernel.h"
 
 void nn_kernel_offset(int dimensionCount, int* dimensions, int** result)
 {

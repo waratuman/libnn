@@ -1,10 +1,7 @@
+#include <nn.h>
 #include <stdlib.h>
 
 #include "utils.h"
-#include "layer.h"
-#include "kernel.h"
-#include "layers/convolutional.h"
-#include "limits.h"
 
 // \prod_{i=1}^{n}\left(\frac{d_i + 2p_i - k_i}{s_i} + 1\right)
 void nn_layer_init_convolutional(nn_layer_convolutional_t *l)
@@ -38,16 +35,16 @@ void nn_layer_init_convolutional(nn_layer_convolutional_t *l)
         l->weights[i] = calloc(l->weightCount, sizeof(float));
     }
 
-    if (l->integration == NULL) {
-        l->integration = sum_of_products_integration;
+    if (l->aggregation == NULL) {
+        l->aggregation = nn_sop_fn;
     }
 }
 
-nn_layer_convolutional_t* nn_layer_create_convolutional(nn_activation_fn fa, nn_integration_fn fi, int ic, int dc, int kc, int* ds, int* p, int* st, int* sz)
+nn_layer_convolutional_t* nn_layer_create_convolutional(nn_activation_fn fa, nn_aggregation_fn fi, int ic, int dc, int kc, int* ds, int* p, int* st, int* sz)
 {
     nn_layer_convolutional_t* l = calloc(1, sizeof(nn_layer_convolutional_t));
     l->activation = fa;
-    l->integration = fi;
+    l->aggregation = fi;
     l->inputCount = ic;
     l->inputDimensionCount = dc;
     l->kernelCount = kc;
@@ -86,8 +83,8 @@ void nn_layer_destroy_convolutional(nn_layer_convolutional_t* l)
     free(l);
 }
 
-// Integrate the layer
-void nn_layer_integrate_convolutional(nn_layer_convolutional_t *l, float* input, float* output)
+// Aggregate the layer
+void nn_layer_aggregate_convolutional(nn_layer_convolutional_t *l, float* input, float* output)
 {
     // TODO: Move to init method
     int** kernelTransform = calloc(l->weightCount, sizeof(int*));
@@ -132,8 +129,8 @@ void nn_layer_integrate_convolutional(nn_layer_convolutional_t *l, float* input,
         float bias = l->biases[kernelIndex];
         float* weights = l->weights[kernelIndex];
 
-        float* integrationInputs[2] = {kernelInput, weights};
-        output[i] = l->integration(l->weightCount, integrationInputs) + bias;
+        float* aggregationInputs[2] = {kernelInput, weights};
+        output[i] = l->aggregation(l->weightCount, aggregationInputs) + bias;
     }
     free(kernelInput);
 
@@ -147,7 +144,7 @@ void nn_layer_integrate_convolutional(nn_layer_convolutional_t *l, float* input,
 // Activate the layer
 void nn_layer_activate_convolutional(nn_layer_convolutional_t *l, float* input, float* output)
 {
-    nn_layer_integrate_convolutional(l, input, output);
+    nn_layer_aggregate_convolutional(l, input, output);
     for (int i = 0; i < l->outputCount; i++) {
         output[i] = l->activation(&output[i], 0);
     }

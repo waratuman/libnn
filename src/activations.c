@@ -1,9 +1,9 @@
-#include "math.h"
-#include "activations.h"
+#include <nn.h>
+#include <math.h>
 
-// 0: f(x) = x
-// 1: f(x) = 1
-float linear_activation(float* args, int d)
+
+// Identity / Linear Function
+static inline float nn_identity_inline(float* args, int d)
 {
     if (d == 1) {
         return 1.0;
@@ -12,9 +12,17 @@ float linear_activation(float* args, int d)
     return args[0];
 }
 
-// 0: f(x) &= x^2
-// 1: f'(x) &= 2x
-float squared_activation(float* args, int d)
+float nn_identity_fn(float* args, int d) {
+    return nn_identity_inline(args, d);
+}
+
+float nn_linear_fn(float* args, int d)
+{
+    return nn_identity_inline(args, d);
+}
+
+// Squared Function
+float nn_squared_fn(float* args, int d)
 {
     if (d == 1) {
         return 2.0 * args[0];
@@ -23,63 +31,178 @@ float squared_activation(float* args, int d)
     return pow(args[0], 2);
 }
 
-// 0: f(x) = \frac{1}{1 + e^{-x}}
-// 1: f'(x) = \frac{1}{1 + e^{-x}} \left(1 - \frac{1}{1 + e^{-x}} \right)
-float sigmoid_activation(float* args, int d)
+// Binary Step Function
+float nn_binary_step_fn(float* args, int d)
 {
     if (d == 1) {
-        float x2 = sigmoid_activation(args, 0);
+        return 0.0;
+    }
+
+    if (args[0] < 0) {
+        return 0;
+    }
+
+    return 1;
+}
+
+// Logistic / Sigmoid / SoftStep Function
+static inline float nn_sigmoid_inline(float* args, int d)
+{
+    if (d == 1) {
+        float x2 = nn_sigmoid_inline(args, 0);
         return x2 * (1.0 - x2);
     }
 
     return 1.0 / (1.0 + exp(-args[0]));
 }
 
-// 0: f(x) = \left \{	\begin{array}{rcl}
-//      0 & \mbox{for} & x < 0\\
-//      x & \mbox{for} & x \ge 0\end{array} \right.
-// 1: f'(x) = \left \{	\begin{array}{rcl}
-//      0 & \mbox{for} & x < 0\\
-//      1 & \mbox{for} & x \ge 0\end{array} \right.
-float rectified_linear(float* args, int d)
+float nn_sigmoid_fn(float* args, int d)
+{
+    return nn_sigmoid_inline(args, d);
+}
+
+float nn_logistic_fn(float* args, int d)
+{
+    return nn_sigmoid_inline(args, d);
+}
+
+float nn_softstep_fn(float* args, int d)
+{
+    return nn_sigmoid_inline(args, d);
+}
+
+// TanH Function
+float nn_tanh_fn(float* args, int d)
+{
+    if (d == 1) {
+        return 1.0 - pow(nn_tanh_fn(args, 0), 2);
+    }
+
+    return tanh(args[0]);
+}
+
+// ArcTan Function
+float nn_arctan_fn(float *args, int d)
+{
+    if (d == 1) {
+        return 1 / (pow(args[0], 2) + 1);
+    }
+
+    return atan(args[0]);
+}
+
+// Rectified Linear Unit Function
+float nn_relu_fn(float* args, int d)
+{
+    if (d == 1) {
+        return (args[0] < 0) ? 0 : 1;
+    }
+
+    return (args[0] < 0) ? 0 : args[0];
+}
+
+// Parameteric Rectified Linear Unit / Leaky Rectified Linear Unit Function
+float nn_prelu_fn(float* args, int d)
+{
+    if (d == 1) {
+        return (args[1] < 0) ? args[0] : 1;
+    }
+
+    return (args[1] < 0) ? args[1] * args[0] : args[1];
+}
+
+// Exponential Linear Unit Function
+float nn_elu_fn(float* args, int d)
+{
+    if (d == 1) {
+        return (args[1] < 0) ? nn_elu_fn(args, 0) + args[0] : 1.0;
+    }
+
+    return (args[1] < 0) ? args[0] * (exp(args[1]) - 1) : args[1];
+}
+
+// SoftPlus Function
+float nn_softplus_fn(float* args, int d)
+{
+    if (d == 1) {
+        return 1.0 / (1.0 + exp(-args[0]));
+    }
+
+    return log(1 + exp(args[0]));
+}
+
+// Bent Identity Function
+float nn_bent_identity_fn(float* args, int d)
+{
+    if (d == 1) {
+        return args[0] / (2 * sqrt(pow(args[0], 2) + 1)) + 1.0;
+    }
+
+    return (sqrt(pow(args[0], 2) + 1) - 1) / 2.0 + args[0];
+}
+
+// Soft Exponential Function
+float nn_softexp_fn(float* args, int d)
 {
     if (d == 1) {
         if (args[0] < 0) {
-            return 0;
-        } else {
-            return 1;
+            return 1 / (1 - args[0] * (args[0] + args[1]));
         }
+        return exp(args[0] * args[1]);
     }
 
     if (args[0] < 0) {
-        return 0;
-    } else {
-        return args[0];
+        return -(log(1 - args[0] * (args[1] + args[0])) / args[0]);
     }
+
+    if (args[0] == 0.0) {
+        return args[1];
+    }
+
+    return (exp(args[0] * args[1]) - 1) / args[0] + args[0];
 }
 
-// f(\alpha, x)  &= \begin{cases}
-//     x & \mbox{if } x > 0 \\
-//     \alpha x & \mbox{otherwise}
-// \end{cases}\\
-// f'(\alpha, x)  &= \begin{cases}
-//     1 & \mbox{if } x > 0 \\
-//     \alpha & \mbox{otherwise}
-// \end{cases}
-float leaky_rectified_linear_unit(float* args, int d)
+// Sinusoid Function
+float nn_sin_fn(float* args, int d)
 {
     if (d == 1) {
-        if (args[1] > 0) {
-            return 1;
-        } else {
-            return args[0];
-        }
+        return cos(args[0]);
     }
 
-    if (args[1] > 0) {
-        return args[1];
-    } else {
-        return args[0] * args[1];
-    }
+    return sin(args[0]);
 }
 
+// Sinc Function
+float nn_sinc_fn(float* args, int d)
+{
+    if (d == 1) {
+        if (args[0] == 0.0) {
+            return 0;
+        }
+        return cos(args[0]) / args[0] - sin(args[0]) / pow(args[0], 2);
+    }
+
+    if (args[0] == 0.0) {
+        return 1;
+    }
+
+    return sin(args[0]) / args[0];
+}
+
+// Gaussian Function
+float nn_gaussian_fn(float* args, int d)
+{
+    if (d == 1) {
+        return -1 * args[0] * exp(pow(-args[0], 2));
+    }
+
+    return exp(pow(-args[0], 2));
+}
+
+// TODO: Noisy Rectified Linear Unit Function
+// https://en.wikipedia.org/wiki/Rectifier_(neural_networks)
+// Y &\sim \mathcal{N}(0, \sigma(x))
+// f(x) &= \max(0, x + Y)
+
+// TODO: Softmax
+// https://en.wikipedia.org/wiki/Softmax_function

@@ -1,6 +1,6 @@
+#include <nn.h>
+
 #include "minunit.h"
-#include "layer.h"
-#include "layers/lrn.h"
 
 char* test_nn_layer_init_lrn()
 {

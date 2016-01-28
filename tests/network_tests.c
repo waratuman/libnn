@@ -1,16 +1,17 @@
+#include <nn.h>
+
 #include "minunit.h"
-#include "network.h"
 
 char* test_nn_network_create()
 {
-    LAYER_TYPE types[1] = {FULLY_CONNECTED};
+    nn_layer_type_t types[1] = {NN_FC};
 
     nn_layer_fully_connected_t** l = calloc(1, sizeof(nn_layer_fully_connected_t*));
-    l[0] = nn_layer_create_fully_connected(linear_activation, sum_of_products_integration, 1, 1);
+    l[0] = nn_layer_create_fully_connected(nn_linear_fn, nn_sop_fn, 1, 1);
     nn_network_t* n = nn_network_create(1, types, (void**)l);
 
     mu_assert(n->layerCount == 1, "Layer count == 1");
-    mu_assert(n->error == squared_error, "Default loss == squared_error");
+    mu_assert(n->error == nn_mse_fn, "Default loss == nn_mse_fn");
 
     nn_network_destroy(n);
     return NULL;
@@ -18,9 +19,9 @@ char* test_nn_network_create()
 
 char* test_nn_network_activate_1layer()
 {
-    LAYER_TYPE types[1] = {FULLY_CONNECTED};
+    nn_layer_type_t types[1] = {NN_FC};
     nn_layer_fully_connected_t** l = calloc(1, sizeof(nn_layer_fully_connected_t*));
-    l[0] = nn_layer_create_fully_connected(linear_activation, sum_of_products_integration, 1, 1);
+    l[0] = nn_layer_create_fully_connected(nn_linear_fn, nn_sop_fn, 1, 1);
     nn_network_t* n = nn_network_create(1, types, (void**)l);
 
     float input[1] = {1};
@@ -39,10 +40,10 @@ char* test_nn_network_activate_1layer()
 
 char* test_nn_network_activate_2layer()
 {
-    LAYER_TYPE types[2] = {FULLY_CONNECTED, FULLY_CONNECTED};
+    nn_layer_type_t types[2] = {NN_FC, NN_FC};
     nn_layer_fully_connected_t** l = calloc(2, sizeof(nn_layer_fully_connected_t*));
-    l[0] = nn_layer_create_fully_connected(linear_activation, sum_of_products_integration, 2, 2);
-    l[1] = nn_layer_create_fully_connected(linear_activation, sum_of_products_integration, 2, 1);
+    l[0] = nn_layer_create_fully_connected(nn_linear_fn, nn_sop_fn, 2, 2);
+    l[1] = nn_layer_create_fully_connected(nn_linear_fn, nn_sop_fn, 2, 1);
     nn_network_t* n = nn_network_create(2, types, (void**)l);
 
     float input[2] = {1, 1};
@@ -71,7 +72,7 @@ char* test_nn_network_activate_2layer()
 
     l[1]->weights[0][0] = 1;
     l[1]->weights[0][1] = 1;
-    l[1]->activation = sigmoid_activation;
+    l[1]->activation = nn_sigmoid_fn;
     nn_network_activate(n, input, output);
     char buffer[20];
     sprintf(buffer, "%f", output[0]);
@@ -87,9 +88,9 @@ char* test_nn_network_loss()
 {
     char buffer[20];
 
-    LAYER_TYPE types[1] = {FULLY_CONNECTED};
+    nn_layer_type_t types[1] = {NN_FC};
     nn_layer_fully_connected_t** l = calloc(1, sizeof(nn_layer_fully_connected_t*));
-    l[0] = nn_layer_create_fully_connected(linear_activation, sum_of_products_integration, 3, 3);
+    l[0] = nn_layer_create_fully_connected(nn_linear_fn, nn_sop_fn, 3, 3);
     nn_network_t* n = nn_network_create(1, types, (void**)l);
 
     l[0]->weights[0][0] = 1.0;

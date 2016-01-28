@@ -1,15 +1,14 @@
+#include <nn.h>
 #include <stdlib.h>
-
-#include "network.h"
 
 void nn_network_init(nn_network_t *n)
 {
     if (n->error == NULL) {
-        n->error = squared_error;
+        n->error = nn_mse_fn;
     }
 }
 
-nn_network_t* nn_network_create(int lc, LAYER_TYPE* layerTypes, void** layers)
+nn_network_t* nn_network_create(int lc, nn_layer_type_t* layerTypes, void** layers)
 {
     nn_network_t* n = calloc(1, sizeof(nn_network_t));
 
@@ -78,7 +77,7 @@ void nn_network_train(nn_network_t* n, float* inputs, float* target)
     //
     // // Step 1: Activate the network, storing the node activations and derivatives (including loss layer)
     // for (int i = 0; i < n->layerCount; i++) {
-    //     nn_layer_integrate(n->layers[i], inputs, n->activations[i]);
+    //     nn_layer_aggregate(n->layers[i], inputs, n->activations[i]);
     //     for (int j = 0; j < n->layers[i]->outputCount; j++) {
     //         n->derivatives[i][j] = n->layers[i]->activation(n->activations[i][j], 0);
     //         n->activations[i][j] = n->layers[i]->activation(n->activations[i][j], 0);

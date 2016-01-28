@@ -2,7 +2,7 @@
 
 // f(a, b) = 1 / 2 (b - a) ^ 2
 // f'(a, b) = (b - a)
-float squared_error(float a, float b, int d)
+float nn_mse_fn(float a, float b, int d)
 {
     if (d == 1) {
         return (b - a);
@@ -11,7 +11,7 @@ float squared_error(float a, float b, int d)
     return 0.5 * pow(b - a, 2);
 }
 
-float sum_error_integration(int n, float* a)
+float nn_mse_aggregate_fn(int n, float* a)
 {
     float r;
     for (int i = 0; i < n; i++) {
